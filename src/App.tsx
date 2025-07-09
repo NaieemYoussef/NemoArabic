@@ -1,51 +1,64 @@
 import React, { useState } from 'react';
 import { TextAreaInput } from './components/TextAreaInput';
 import { ActionButton } from './components/ActionButton';
-import { callOpenAIAPI } from './services/geminiService';
+import { APISettings } from './components/APISettings';
+import { callOpenAIAPI } from './services/openaiService';
+import './style.css';
 
 const App: React.FC = () => {
   const [inputText, setInputText] = useState('');
-  const [enhancedText, setEnhancedText] = useState('');
+  const [outputText, setOutputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [tokensUsed, setTokensUsed] = useState<number | null>(null);
 
-  const handleEnhance = async () => {
+  const handleSubmit = async () => {
+    if (!inputText.trim()) return;
     setIsLoading(true);
-    try {
-      const response = await callOpenAIAPI(inputText);
-      setEnhancedText(response);
-    } catch (error) {
-      console.error('حدث خطأ أثناء الاتصال بـ OpenAI:', error);
-      setEnhancedText('حدث خطأ أثناء المعالجة، برجاء المحاولة لاحقًا.');
-    } finally {
-      setIsLoading(false);
-    }
+    const response = await callOpenAIAPI(inputText);
+    setOutputText(response.result);
+    setTokensUsed(response.tokensUsed);
+    setIsLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 md:p-10">
-      <div className="max-w-4xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-center text-teal-700 mb-6">محسن النصوص العربية</h1>
-        
-        <TextAreaInput
-          id="original-text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder="اكتب النص العربي هنا..."
-          className="min-h-[200px]"
-        />
+    <div className="max-w-3xl mx-auto px-4 py-6 text-right">
+      <h1 className="text-2xl font-bold mb-6 text-center">✍️ محسن النصوص العربية</h1>
 
-        <ActionButton onClick={handleEnhance} isLoading={isLoading} className="w-full md:w-auto">
-          تحسين النص
-        </ActionButton>
+      <APISettings />
 
-        <TextAreaInput
-          id="enhanced-text"
-          value={enhancedText}
-          readOnly
-          isLoading={isLoading}
-          className="min-h-[200px]"
-        />
-      </div>
+      <label className="block mb-2 font-medium">📝 أدخل النص هنا:</label>
+      <TextAreaInput
+        id="input-text"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
+        placeholder="اكتب نصك هنا..."
+        rows={8}
+        isLoading={isLoading}
+        className="mb-4"
+      />
+
+      <ActionButton onClick={handleSubmit} isLoading={isLoading}>
+        تحسين النص
+      </ActionButton>
+
+      {outputText && (
+        <>
+          <label className="block mt-6 mb-2 font-medium">🔍 النص المحسّن:</label>
+          <TextAreaInput
+            id="output-text"
+            value={outputText}
+            readOnly
+            isLoading={isLoading}
+            className="mb-2"
+          />
+
+          {tokensUsed !== null && (
+            <p className="text-sm text-slate-600 mt-2 text-left">
+              🧮 عدد التوكنات المستخدمة: {tokensUsed}
+            </p>
+          )}
+        </>
+      )}
     </div>
   );
 };

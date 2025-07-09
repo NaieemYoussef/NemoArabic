@@ -5,4 +5,32 @@
 body {
   font-family: 'Noto Kufi Arabic', sans-serif;
   background-color: #f8fafc;
+  direction: rtl;
+  text-align: right;
+}
+
+/* تحسين مظهر الحقول */
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  direction: rtl;
+}
+
+/* الأزرار */
+button {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* العناوين */
+label {
+  font-weight: 600;
+}
+
+/* تخصيص واجهة إعدادات المستخدم */
+.settings-box {
+  @apply bg-white p-4 rounded-lg shadow-md max-w-md mx-auto my-6 text-right;
 }
